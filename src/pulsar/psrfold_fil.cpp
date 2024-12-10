@@ -299,6 +299,7 @@ int main(int argc, const char *argv[])
 
 	reader->skip_start = nstart;
 	reader->skip_end = ntotal - nend;
+    long int actual_nsamples = nend - nstart;
 	reader->skip_head();
 
 	Patch patch;
@@ -450,11 +451,11 @@ int main(int argc, const char *argv[])
 
 	for (long int k=0; k<ncand; k++)
 	{
-		folder[k].start_mjd = reader->start_mjd+(ceil(1.*dedisp.offset/dedisp.ndump)*dedisp.ndump-dedisp.offset)*dedisp.tsamp*td;
+		folder[k].start_mjd = reader->skip_start+(ceil(1.*dedisp.offset/dedisp.ndump)*dedisp.ndump-dedisp.offset)*dedisp.tsamp*td;
 		if (vm.count("pepoch"))
 			folder[k].ref_epoch = MJD(vm["pepoch"].as<double>());
 		else
-			folder[k].ref_epoch = reader->start_mjd+(ntotal*tsamp/2.);
+			folder[k].ref_epoch = reader->skip_start+(actual_nsamples*tsamp/2.);
 		folder[k].resize(1, subdata.nchans, folder[k].nbin);
 		folder[k].nblock = nblock;
 		folder[k].prepare(subdata);
@@ -583,7 +584,7 @@ int main(int argc, const char *argv[])
 		fmin = databuf.frequencies[j]<fmin? databuf.frequencies[j]:fmin;
 	}
 
-	double tint = ntotal*tsamp;
+	double tint = actual_nsamples*tsamp;
 
 	vector<Pulsar::GridSearch> gridsearch;
 	for (long int k=0; k<ncand; k++)

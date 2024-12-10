@@ -315,6 +315,8 @@ int main(int argc, const char *argv[])
 
 	reader->skip_start = nstart;
 	reader->skip_end = ntotal - nend;
+    long int actual_nsamples = nend - nstart;
+
 	reader->skip_head();
 
 	Patch patch;
@@ -494,11 +496,11 @@ int main(int argc, const char *argv[])
 		tsamps[k] = dedisp.get_tsamp(folder[k].dm);
 		ids[k] = dedisp.get_id(folder[k].dm);
 
-		folder[k].start_mjd = reader->start_mjd + (ceil(1. * offsets[k] / ndumps[k]) * ndumps[k] - offsets[k]) * tsamps[k];
+		folder[k].start_mjd = reader->skip_start + (ceil(1. * offsets[k] / ndumps[k]) * ndumps[k] - offsets[k]) * tsamps[k];
 		if (vm.count("pepoch"))
 			folder[k].ref_epoch = MJD(vm["pepoch"].as<double>());
 		else
-			folder[k].ref_epoch = reader->start_mjd + (ntotal*tsamp/2.);
+			folder[k].ref_epoch = reader->skip_start + (actual_nsamples*tsamp/2.);
 		folder[k].resize(1, tmpsubdata.nchans, folder[k].nbin);
 		folder[k].nblock = nblock;
 		folder[k].prepare(tmpsubdata);
@@ -666,7 +668,7 @@ int main(int argc, const char *argv[])
 	
 	dedisp.close();
 
-	double tint = ntotal*tsamp;
+	double tint = actual_nsamples*tsamp;
 
 	vector<Pulsar::GridSearch> gridsearch;
 	for (long int k=0; k<ncand; k++)
